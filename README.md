@@ -1,4 +1,4 @@
-# AVA — Advanced Voice Assistant
+# AI Voice Agent
 
 A modern, browser‑based voice assistant built with FastAPI and a rich, animated UI. AVA lets you:
 - Speak to the assistant and get transcribed text using AssemblyAI
@@ -246,4 +246,5 @@ You may not:
 
 For inquiries regarding usage rights, please contact: iambipulshukla@gmail.com .
 Check the licenses and usage limits for AssemblyAI, Google Generative AI, and Murf AI before deploying to production.
+
 
