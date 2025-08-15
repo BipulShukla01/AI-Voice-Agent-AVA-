@@ -10,6 +10,12 @@ The frontend is a single, responsive HTML page with a polished gradient UI and a
 
 ---
 
+## Acknowledgement
+
+This project was developed with support from [Murf AI] (https://murf.ai).
+
+---
+
 ## Table of Contents
 1. Features
 2. Architecture Overview
@@ -224,4 +230,5 @@ UI → Show text, update chat bubbles, play audio
 ---
 
 ## License
+
 This project is provided as‑is for educational/demo purposes. Check the licenses and usage limits for AssemblyAI, Google Generative AI, and Murf AI before deploying to production.
