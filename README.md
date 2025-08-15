@@ -231,4 +231,19 @@ UI → Show text, update chat bubbles, play audio
 
 ## License
 
-This project is provided as‑is for educational/demo purposes. Check the licenses and usage limits for AssemblyAI, Google Generative AI, and Murf AI before deploying to production.
+All Rights Reserved
+
+Copyright (c) 2025 Bipul Shukla
+
+This source code and its contents are the exclusive property of Bipul Shukla.
+Unauthorized use, copying, modification, merging, publishing, distribution, sublicensing, 
+or sale of this code or any derivative works is strictly prohibited.
+
+You may not:
+- Use this code for any purpose without prior written permission.
+- Copy, modify, merge, publish, distribute, sublicense, or sell copies of the code.
+- Create derivative works from this code.
+
+For inquiries regarding usage rights, please contact: iambipulshukla@gmail.com .
+Check the licenses and usage limits for AssemblyAI, Google Generative AI, and Murf AI before deploying to production.
+
