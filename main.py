@@ -55,14 +55,20 @@ class TextQueryRequest(BaseModel):
 class ClearChatRequest(BaseModel):
     session_id: str
 
-# --- Configuration & Validation ---
-# Load the .env file
-load_dotenv("uploads/.env")
+# --- Paths & Configuration ---
+BASE_DIR = Path(__file__).resolve().parent
+# Ensure upload directory exists early so paths below are valid everywhere
+UPLOAD_DIR = BASE_DIR / "uploads"
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+# Config/encryption paths (used by helpers below)
+CONFIG_PATH = UPLOAD_DIR / "config.json"
+KEY_PATH = UPLOAD_DIR / ".config.key"
+
+# Load the .env file from uploads if present
+load_dotenv(str(UPLOAD_DIR / ".env"))
 
 # In-memory user-provided API key store (non-persistent)
 USER_API_KEYS: dict[str, str] = {}
-
-# Paths for encrypted config will be set after UPLOAD_DIR init
 
 # Helper to read .env values safely
 ENV_DEFAULTS = {
@@ -79,6 +85,15 @@ def _get_fernet() -> "Fernet | None":
     if not ENCRYPTION_AVAILABLE:
         return None
     try:
+        # Prefer SECRET_KEY from environment if provided (Render-friendly)
+        secret = os.getenv("SECRET_KEY")
+        if secret:
+            # Derive a 32-byte urlsafe base64 key from SECRET_KEY
+            import hashlib, base64
+            digest = hashlib.sha256(secret.encode("utf-8")).digest()
+            key = base64.urlsafe_b64encode(digest)
+            return Fernet(key)
+        # Fallback to file-based key
         if KEY_PATH.exists():
             key = KEY_PATH.read_bytes()
         else:
@@ -239,16 +254,9 @@ app.add_middleware(
 )
 
 # --- Setup ---
-# Mount static files and templates
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
-
-# Ensure upload directory exists
-UPLOAD_DIR = Path("uploads")
-UPLOAD_DIR.mkdir(exist_ok=True)
-# Now that UPLOAD_DIR exists, define config paths
-CONFIG_PATH = UPLOAD_DIR / "config.json"
-KEY_PATH = UPLOAD_DIR / ".config.key"
+# Mount static files and templates using absolute paths for Render
+app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 # --- Persistence (SQLite via SQLAlchemy, minimal) ---
 try:
@@ -1673,3 +1681,4 @@ if __name__ == "__main__":
     print("✨ Ready to assist!")
     
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
