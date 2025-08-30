@@ -1,235 +1,250 @@
-# AI Voice Agent
+<p align="center">
+  <img src="/static/icons/icon-192.png" width="84" height="84" alt="AVA logo" />
+</p>
 
-A modern, browser‑based voice assistant built with FastAPI and a rich, animated UI. AVA lets you:
-- Speak to the assistant and get transcribed text using AssemblyAI
-- Get AI responses powered by Google Gemini, with session‑aware conversation history
-- Hear the assistant’s response as natural speech generated via Murf AI
-- Use a text‑only chat flow when voice isn’t available
+<h1 align="center">AVA — Advanced Voice Assistant</h1>
 
-The frontend is a single, responsive HTML page with a polished gradient UI and animated avatar, and the backend exposes a clean set of JSON APIs.
+<p align="center">
+  A futuristic, PWA-ready voice assistant with a cinematic UI, real-time AI, and smart playback control.
+  <br/>Speak naturally, see live transcriptions, hear lifelike replies, and preview music — all in one sleek UI.
+</p>
 
----
-
-## Acknowledgement
-
-This project was developed with support from [Murf AI] (https://murf.ai).
-
----
-
-## Table of Contents
-1. Features
-2. Architecture Overview
-3. Tech Stack
-4. Project Structure
-5. Environment Variables
-6. Running Locally
-7. API Reference
-8. Frontend UX Notes
-9. Testing
-10. Deployment Notes
+<p align="center">
+  <a href="https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white"><img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white" alt="Python 3.10+" /></a>
+  <a href="https://img.shields.io/badge/FastAPI-⚡-009688?logo=fastapi&logoColor=white"><img src="https://img.shields.io/badge/FastAPI-⚡-009688?logo=fastapi&logoColor=white" alt="FastAPI" /></a>
+  <a href="https://img.shields.io/badge/PWA-Ready-5A0FC8?logo=pwa&logoColor=white"><img src="https://img.shields.io/badge/PWA-Ready-5A0FC8?logo=pwa&logoColor=white" alt="PWA Ready" /></a>
+  <a href="https://img.shields.io/badge/License-OSS-2ea44f"><img src="https://img.shields.io/badge/License-OSS-2ea44f" alt="License" /></a>
+</p>
 
 ---
 
-## 1) Features
-- Conversational voice chat (record → transcribe → AI → TTS return)
-- Session‑aware chat memory per `session_id`
-- Text‑only chat endpoint for quick testing and accessibility
-- Echo Bot demo (transcribe your voice and speak it back using TTS)
-- Clean, animated UI with mobile‑friendly layout
-- PWA manifest and favicon for an app‑like feel
+## ✨ Highlights
+
+- **Conversational voice chat** with session memory
+- **Text-only chat** for accessibility and quick testing
+- **Music previews** via Spotify (with iTunes fallback)
+- **Smart playback control** (barge‑in) between Murf TTS and Spotify
+- **Beautiful, animated UI** (particles, waves, breathing avatar)
+- **Installable PWA** with offline-safe assets and screenshots
+- **Pluggable API keys** via UI with optional local encryption
+
+<div align="center">
+  <img src="/static/screenshot-wide.png" alt="AVA wide screenshot" width="85%" style="border-radius: 12px;" />
+  <br/>
+  <sub>Modern, cinematic UI designed for both desktop and mobile.</sub>
+</div>
 
 ---
 
-## 2) Architecture Overview
+## 🧭 Table of Contents
 
-High‑level flow (Voice Chat):
-1. Browser records microphone audio (Web MediaRecorder).
-2. Frontend sends audio to the backend `/llm/query` with a `session_id`.
-3. Backend transcribes speech via AssemblyAI.
-4. Backend calls Google Gemini with ongoing chat history for the session.
-5. Backend sends AI text to Murf AI to generate a voice reply (MP3).
-6. Frontend displays both text and an audio player for the reply.
-
-Text‑only flow:
-- Frontend (or script) sends text + `session_id` to `/llm/text-query`.
-- Backend calls Gemini and returns the AI text (updates session history).
-
-Session management:
-- In‑memory `chat_sessions` dictionary on the server keyed by `session_id`.
-- `/chat/clear` clears a session’s stored history.
+1. [Features](#-highlights)
+2. [Quickstart](#-quickstart-local)
+3. [Architecture](#-architecture-overview)
+4. [Playback Control](#-playback-control-bargein)
+5. [API Reference](#-api-reference-core)
+6. [Environment](#-environment--config)
+7. [Project Structure](#-project-structure)
+8. [Screenshots](#-screenshots)
+9. [Testing](#-testing)
+10. [Deployment](#-deployment)
+11. [Roadmap](#-roadmap)
+12. [License](#-license)
 
 ---
 
-## 3) Tech Stack
-- **Backend**: FastAPI, Uvicorn
-- **AI APIs**:
-  - **AssemblyAI**: Speech‑to‑Text
-  - **Google Gemini**: Text generation (chat)
-  - **Murf AI**: Text‑to‑Speech
-- **Frontend**: Vanilla HTML/CSS/JS, Font Awesome, Google Fonts
-- **PWA**: `static/manifest.json` with inline SVG icons
+## 🚀 Quickstart (Local)
 
----
+Prerequisites: Python 3.10+
 
-## 4) Project Structure
-```
-AVA/
-├─ main.py                 # FastAPI app, routes, integrations
-├─ templates/
-│  └─ index.html           # Single‑page UI (Jinja served)
-├─ static/
-│  ├─ script.js            # Frontend logic (tabs, recording, chat)
-│  └─ manifest.json        # PWA manifest & icons
-├─ uploads/
-│  └─ .env                 # Local environment variables (not for production)
-├─ test_ai_chat.py         # Quick API test script for text chat
-└─ README.md               # You are here
-```
-
----
-
-## 5) Environment Variables
-Create `uploads/.env` with:
-- **MURF_API_KEY**: Murf AI API key (required for TTS)
-- **ASSEMBLYAI_API_KEY**: AssemblyAI API key (required for transcription)
-- **GEMINI_API_KEY**: Google Generative AI API key (required for LLM)
-
-Example `uploads/.env`:
-```
-MURF_API_KEY=your_murf_key
-ASSEMBLYAI_API_KEY=your_assemblyai_key
-GEMINI_API_KEY=your_gemini_key
-```
-
-Notes:
-- Keys are loaded via `dotenv` in `main.py` using `load_dotenv("uploads/.env")`.
-- If a key is missing, the app continues to run and returns a graceful fallback with a local placeholder MP3 for TTS endpoints.
-
----
-
-## 6) Running Locally
-
-Prerequisites:
-- Python 3.10+
-- API keys for AssemblyAI, Gemini, and Murf AI
-
-Steps:
-1. Create and activate a virtual environment (recommended).
-2. Install dependencies.
-3. Add `uploads/.env` with your keys.
-4. Start the API server.
-5. Open the UI in your browser.
-
-Example commands:
 ```powershell
-# 1) (Windows PowerShell) create venv
+# Windows PowerShell
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-
-# 2) install dependencies
-pip install fastapi uvicorn python-dotenv requests assemblyai google-generativeai
-
-# 3) ensure .env exists with your keys in uploads/.env
-# (see Environment Variables section)
-
-# 4) run server
+. .\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+# Add your keys to uploads/.env (see Environment)
 python main.py
-# Server will start at http://localhost:8000
+# Open http://localhost:8000
 ```
+
+```bash
+# macOS/Linux
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+# Add your keys to uploads/.env (see Environment)
+python main.py
+# Open http://localhost:8000
+```
+
+> Tip: In production on a single instance (Render Free/Starter), keep a single worker for WebSockets and in-memory sessions:
+>
+> `gunicorn -w 1 -k uvicorn.workers.UvicornWorker main:app`
+>
+> If you scale horizontally (multiple instances), move session state to Redis/DB and enable sticky sessions before increasing workers.
 
 ---
 
-## 7) API Reference
+## 🧩 Architecture Overview
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant U as User
+  participant B as Browser (AVA UI)
+  participant API as FastAPI Backend
+  participant STT as AssemblyAI (STT)
+  participant LLM as Google Gemini (LLM)
+  participant TTS as Murf AI (TTS)
+
+  U->>B: Speak
+  B->>API: POST /llm/query (audio + session_id)
+  API->>STT: Transcribe audio
+  STT-->>API: transcript
+  API->>LLM: Chat (w/ session history)
+  LLM-->>API: llmResponse
+  API->>TTS: Generate voice
+  TTS-->>API: audioFile (mp3)
+  API-->>B: { transcript, llmResponse, audioFile }
+  B-->>U: Show text + play audio
+```
+
+- **Text‑only flow**: `POST /llm/text-query` → returns `{ llmResponse }`.
+- **Session storage**: in-memory by `session_id` (swap for Redis/DB as needed).
+
+---
+
+## 🎚️ Playback Control (Barge‑In)
+
+To keep the experience natural and interruption‑friendly, AVA enforces:
+
+- **Murf → Spotify**: If Murf TTS is playing, Spotify preview is paused.
+- **Spotify → Murf**: If Spotify preview starts, Murf TTS stops.
+- **User speech → All off**: When the mic is listening or speech is detected, any current playback (Murf/Spotify) stops immediately and the recording pipeline continues.
+
+This prevents overlapping audio and ensures fast barge‑in during conversation.
+
+---
+
+## 📡 API Reference (Core)
 
 Base URL: `http://localhost:8000`
 
 - **GET /**
-  - Serves the main UI (`templates/index.html`).
+  - Serves the main UI
 
 - **POST /generate-audio/**
-  - Body (JSON): `{ "text": string }`
-  - Returns: `{ audioFile, ... }` — Murf AI TTS; falls back to `static/fallback.mp3` if key missing.
+  - JSON: `{ "text": string }`
+  - Returns `{ audioFile }` (Murf TTS or fallback)
 
 - **POST /tts/echo/**
-  - Form‑Data: `file` (audio upload)
-  - Transcribes audio using AssemblyAI and regenerates speech with Murf AI.
-  - Returns JSON with `audioFile` and `transcription`.
+  - Form‑Data: `file`
+  - Returns `{ transcription, audioFile }`
 
 - **POST /llm/query**
-  - Form‑Data: `file` (audio upload), `session_id` (string)
-  - Pipeline: STT → Gemini → TTS
-  - Returns JSON with `userTranscription`, `llmResponse`, `audioFile`.
+  - Form‑Data: `file`, `session_id`
+  - Returns `{ userTranscription, llmResponse, audioFile }`
 
 - **POST /llm/text-query**
-  - Body (JSON): `{ "text": string, "session_id": string }`
-  - Sends text to Gemini with session history.
-  - Returns: `{ llmResponse: string }`.
+  - JSON: `{ text, session_id }`
+  - Returns `{ llmResponse }`
 
 - **POST /chat/clear**
-  - Body (JSON): `{ "session_id": string }`
-  - Clears in‑memory history for a session.
-
-HTTP error handling:
-- Endpoints return descriptive JSON errors and `fallback: true` if any external API key is missing or errors occur.
+  - JSON: `{ session_id }`
+  - Clears in‑memory history
 
 ---
 
-## 8) Frontend UX Notes
-- UI delivers a modern animated experience with: floating particles, glowing orbs, animated waves, and a breathing avatar.
-- Voice chat controls include start/stop recording, auto‑record toggle, text‑only toggle, and history clear.
-- Chat bubbles use high‑contrast text colors for readability.
-- Mobile‑optimized: compact session/info badges left‑aligned on small screens.
+## 🔐 Environment & Config
 
-PWA:
-- `static/manifest.json` defines name, theme, and icons (valid inline SVGs).
-- Add to home screen is supported by modern browsers.
+Create `uploads/.env`:
+
+```ini
+MURF_API_KEY=your_murf_key
+ASSEMBLYAI_API_KEY=your_assemblyai_key
+GEMINI_API_KEY=your_gemini_key
+SPOTIFY_CLIENT_ID=your_spotify_client_id
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+TAVILY_API_KEY=your_tavily_key
+WEATHER_API_KEY=your_weather_key
+```
+
+- Keys are loaded via `dotenv` in `main.py` and can be overridden via the in‑app settings modal.
+- Optional local encryption is used for UI‑supplied keys when `cryptography` is available.
+- Missing keys degrade gracefully (e.g., TTS falls back to `static/fallback.mp3`).
 
 ---
 
-## 9) Testing
-Quick text‑chat tests:
+## 🗂️ Project Structure
+
+```
+AVA/
+├─ main.py                      # FastAPI app: routes, skills, integrations
+├─ templates/
+│  └─ index.html                # Single‑page UI
+├─ static/
+│  ├─ script.js                 # Frontend logic (tabs, recording, chat, playback)
+│  ├─ audio-worklet-processor.js# AudioWorklet to stream Float32 frames
+│  ├─ manifest.json             # PWA manifest
+│  ├─ icons/                    # PWA icons
+│  ├─ screenshot-*.png          # PWA screenshots
+│  └─ fallback.mp3              # Safe audio fallback
+├─ sw.js                        # Service worker (network-first for code, cached assets)
+├─ uploads/
+│  ├─ .env                      # Local environment variables
+│  └─ .env.example              # Example template
+├─ requirements.txt             # Python dependencies
+├─ render.yaml                  # Example deployment config
+├─ test_ai_chat.py              # Quick API smoke test
+└─ README.md                    # You are here
+```
+
+---
+
+## 🖼️ Screenshots
+
+<div align="center">
+  <img src="/static/screenshot-wide.png" alt="Wide screenshot" width="85%" style="border-radius: 12px;" />
+  <br/>
+  <img src="/static/screenshot-normal.png" alt="Normal screenshot" width="45%" style="border-radius: 12px; margin-top: 12px;" />
+</div>
+
+---
+
+## 🧪 Testing
+
 ```bash
 python test_ai_chat.py
 ```
-- Hits `/llm/text-query` and `/chat/clear` to verify conversation continuity and clearing.
-- Make sure the server is running at `http://localhost:8000` before executing the test script.
+Ensure the server is running at `http://localhost:8000`.
 
 ---
 
-## 10) Deployment Notes
-- Set environment variables securely in your hosting platform; do not commit `.env` files.
-- Behind a reverse proxy, set CORS and `allow_origins` appropriately in `main.py`.
-- Run with a production server command, for example:
+## ☁️ Deployment
+
+- Set secrets securely (never commit `.env`).
+- Example production command:
+
 ```bash
 uvicorn main:app --host 0.0.0.0 --port 8000 --workers 2
 ```
-- Persisting chat history: current implementation stores sessions in memory; for multi‑instance or long‑lived sessions, use a database or cache (Redis) and adapt the `chat_sessions` store.
+
+- Reverse proxy (e.g., Nginx) should pass WebSocket and static routes.
+- For multi‑instance or long sessions, persist chat sessions (e.g., Redis).
 
 ---
 
-## Diagram — Voice Conversation Flow
-```
-[Browser Mic]
-    │  audio
-    ▼
-POST /llm/query (file + session_id)
-    │
-    ├─> AssemblyAI (STT)
-    │      └─ userTranscription
-    │
-    ├─> Google Gemini (chat with history)
-    │      └─ llmResponse text
-    │
-    └─> Murf AI (TTS)
-           └─ audioFile (MP3 URL)
+## 🗺️ Roadmap
 
-Response → { userTranscription, llmResponse, audioFile }
-UI → Show text, update chat bubbles, play audio
-```
+- Real‑time streaming TTS with smooth cross‑fade
+- On‑device VAD tuning and sensitivity slider
+- Multi‑voice profiles and style tags (cheerful, narrator, whisper)
+- Rich cards (links, images, citations) in chat bubbles
+- Persistent session storage and multi‑device sync
 
 ---
 
-## License
+## 📄 License
 
 All Rights Reserved
 
@@ -245,6 +260,7 @@ You may not:
 - Create derivative works from this code.
 
 For inquiries regarding usage rights, please contact: iambipulshukla@gmail.com .
-Check the licenses and usage limits for AssemblyAI, Google Generative AI, and Murf AI before deploying to production.
+Check the licenses and usage limits for APIs before deploying to production.
+
 
 
