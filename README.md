@@ -38,18 +38,28 @@
 
 ## 🧭 Table of Contents
 
-1. [Features](#-highlights)
-2. [Quickstart](#-quickstart-local)
-3. [Architecture](#-architecture-overview)
-4. [Playback Control](#-playback-control-bargein)
-5. [API Reference](#-api-reference-core)
-6. [Environment](#-environment--config)
+1. [Quickstart](#-quickstart-local)
+2. [Environment & Config](#-environment--config)
+3. [Architecture Overview](#-architecture-overview)
+4. [Core Features](#-core-features)
+   - [Assistant Persona](#-assistant-persona)
+   - [Session Persistence (SQLite)](#-session-persistence-sqlite)
+   - [API Keys (Dual Source + Encryption)](#-api-keys--dual-source--optional-encryption)
+   - [Web Search (Tavily)](#-web-search-skill-tavily)
+   - [Music Search & Previews](#-music-search--previews)
+   - [Speech & Audio Pipeline](#-speech--audio-pipeline)
+   - [PWA & Caching](#-pwa--caching)
+5. [Playback Control (Barge‑In)](#-playback-control-barge-in)
+6. [API Reference (Core)](#-api-reference-core)
 7. [Project Structure](#-project-structure)
 8. [Screenshots](#-screenshots)
 9. [Testing](#-testing)
 10. [Deployment](#-deployment)
-11. [Roadmap](#-roadmap)
-12. [License](#-license)
+11. [Security Considerations](#-security-considerations)
+12. [Data Files](#-data-files)
+13. [Developer Notes](#-developer-notes)
+14. [Roadmap](#-roadmap)
+15. [License](#-license)
 
 ---
 
@@ -85,6 +95,28 @@ python main.py
 
 ---
 
+## 🔐 Environment & Config
+
+Create `uploads/.env`:
+
+```ini
+MURF_API_KEY=your_murf_key
+ASSEMBLYAI_API_KEY=your_assemblyai_key
+GEMINI_API_KEY=your_gemini_key
+SPOTIFY_CLIENT_ID=your_spotify_client_id
+SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
+TAVILY_API_KEY=your_tavily_key
+WEATHER_API_KEY=your_weather_key
+# Optional — used to derive an encryption key for local key storage
+SECRET_KEY=your_random_secret_for_encryption
+```
+
+- Keys are loaded via `dotenv` in `main.py` and can be overridden via the in‑app settings modal.
+- Optional local encryption is used for UI‑supplied keys when `cryptography` is available.
+- Missing keys degrade gracefully (e.g., TTS falls back to `static/fallback.mp3`).
+
+---
+
 ## 🧩 Architecture Overview
 
 ```mermaid
@@ -111,6 +143,65 @@ sequenceDiagram
 
 - **Text‑only flow**: `POST /llm/text-query` → returns `{ llmResponse }`.
 - **Session storage**: in-memory by `session_id` (swap for Redis/DB as needed).
+
+---
+
+## 🧱 Core Features
+
+### 🧠 Assistant Persona
+
+- **System prompt**: AVA’s identity, tone, and behavior are defined by a comprehensive system prompt (see `AVA_SYSTEM_PROMPT` in `main.py`).
+- **Style**: warm, concise, empathetic; stays in character; light humor; boundaries for safe responses.
+
+### 💾 Session Persistence (SQLite)
+
+- When SQLAlchemy is available, AVA persists sessions and messages to `uploads/ava_data.db`.
+- **Models**: `sessions` and `messages` with timestamps, pin/archive flags, and auto-titling.
+- Falls back gracefully when SQLAlchemy is unavailable (in‑memory only).
+
+#### Sessions API
+
+- **POST /sessions** → `{ id, title, pinned, archived }`
+- **GET /sessions** → `{ sessions: [...] }` (optional `?q=` search, `?pinned=1`)
+- **GET /sessions/{session_id}/messages** → `{ messages: [...] }`
+- **PATCH /sessions/{session_id}** (JSON: `{ title?, pinned?, archived? }`) → `{ ok: true }`
+- **DELETE /sessions/{session_id}** → `204 No Content`
+
+### 🔑 API Keys — Dual Source + Optional Encryption
+
+- Keys are resolved from either `uploads/.env` or the **in‑app settings** (UI overrides env).
+- Optional local encryption for UI‑provided keys when `cryptography` is installed.
+  - If `SECRET_KEY` is set in env, a stable 32‑byte key is derived for encryption.
+  - Otherwise a local key file is generated at `uploads/.config.key`.
+- Encrypted config is stored at `uploads/config.json`.
+
+#### Config Endpoints
+
+- **POST /config/api-keys** (JSON map of key → value) — saves keys in memory and securely to disk; also reconfigures dependent SDKs (Gemini, AssemblyAI) live.
+- **GET /config/api-keys** → `{ user: {..}, env: {..}, encryption_active: bool }` (booleans indicate presence only, not secret values).
+
+### 🔎 Web Search Skill (Tavily)
+
+- Integrated **Tavily** search for concise answers with top sources (requires `TAVILY_API_KEY`).
+- Returns an answer followed by a short “Sources” list; fails gracefully on API errors.
+
+### 🎵 Music Search & Previews
+
+- **Spotify search** with market targeting and `include_external=audio` to maximize preview availability.
+- **Token caching** using Client Credentials flow to reduce latency and rate‑limits.
+- **iTunes fallback** provides 30‑second previews when Spotify credentials are missing or previews are unavailable.
+- The UI supports quick play/stop and respects barge‑in rules.
+
+### 🔊 Speech & Audio Pipeline
+
+- **AssemblyAI** for speech‑to‑text; API key loaded at startup and can be updated at runtime via config endpoints.
+- **Murf TTS** for natural‑sounding responses; falls back to a bundled `static/fallback.mp3` when keys are missing.
+- **Barge‑in** orchestration between mic recording, Murf, and Spotify prevents overlapping audio.
+
+### 📦 PWA & Caching
+
+- Installable PWA with manifest, icons, and screenshots.
+- `sw.js` implements a balanced caching strategy: cached static assets, network‑first for application code to keep updates fresh.
 
 ---
 
@@ -152,26 +243,6 @@ Base URL: `http://localhost:8000`
 - **POST /chat/clear**
   - JSON: `{ session_id }`
   - Clears in‑memory history
-
----
-
-## 🔐 Environment & Config
-
-Create `uploads/.env`:
-
-```ini
-MURF_API_KEY=your_murf_key
-ASSEMBLYAI_API_KEY=your_assemblyai_key
-GEMINI_API_KEY=your_gemini_key
-SPOTIFY_CLIENT_ID=your_spotify_client_id
-SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
-TAVILY_API_KEY=your_tavily_key
-WEATHER_API_KEY=your_weather_key
-```
-
-- Keys are loaded via `dotenv` in `main.py` and can be overridden via the in‑app settings modal.
-- Optional local encryption is used for UI‑supplied keys when `cryptography` is available.
-- Missing keys degrade gracefully (e.g., TTS falls back to `static/fallback.mp3`).
 
 ---
 
@@ -234,6 +305,29 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --workers 2
 
 ---
 
+## 🔐 Security Considerations
+
+- Do not commit `uploads/.env`, `uploads/config.json`, or `uploads/.config.key`.
+- Production deployments should use managed secrets and HTTPS.
+- If running multiple instances or behind a load balancer, enable sticky sessions or move session state fully to a shared DB/Redis.
+
+---
+
+## 🗃️ Data Files
+
+- **Database**: `uploads/ava_data.db` (created automatically when SQLAlchemy is available)
+- **Key files**: `uploads/config.json` (encrypted/plain depending on availability), `uploads/.config.key` (when `SECRET_KEY` not provided)
+
+---
+
+## 🧰 Developer Notes
+
+- **Testing**: `test_ai_chat.py` provides a quick smoke test for key endpoints.
+- **Logging**: Key integrations print concise success/error markers in the server logs (e.g., Spotify token fetch, Tavily calls).
+- **Graceful degradation**: Missing keys or optional libs do not crash the app; features disable individually with clear log warnings.
+
+---
+
 ## 🗺️ Roadmap
 
 - Real‑time streaming TTS with smooth cross‑fade
@@ -261,6 +355,7 @@ You may not:
 
 For inquiries regarding usage rights, please contact: iambipulshukla@gmail.com .
 Check the licenses and usage limits for APIs before deploying to production.
+
 
 
 
