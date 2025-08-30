@@ -1,0 +1,38 @@
+# Environment Variables
+# Contains secret API keys and should NEVER be committed.
+uploads/.env
+
+# Python virtual environment
+.venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# Local SSL certificates
+*.pem
+*.key
+
+# App database (local)
+ava_auth.db
+
+# Uploads data and generated media (keep example file)
+uploads/*
+!uploads/.env.example
+# Keep the env file ignored explicitly (already covered)
+uploads/.env
+# Sensitive config and key (if created)
+uploads/config.json
+uploads/.config.key
+
+# Node/PWA build artifacts (if any in future)
+node_modules/
+dist/
+
+# Editor/IDE and history
+.vscode/
+.history/
+
+# OS-specific
+.DS_Store
+Thumbs.db
