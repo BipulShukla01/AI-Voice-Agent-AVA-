@@ -27,7 +27,7 @@ services:
         sync: false
       - key: CORS_ORIGINS
         value: "https://ava-agent.onrender.com"
-    disks:
-      - name: ava-data
-        mountPath: /opt/render/project/src/uploads
-        sizeGB: 2
+    disk:
+      name: ava-data
+      mountPath: /opt/render/project/src/uploads
+      sizeGB: 2
