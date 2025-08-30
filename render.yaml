@@ -30,4 +30,5 @@ services:
     disk:
       name: ava-data
       mountPath: /opt/render/project/src/uploads
-      sizeGB: 2
+      sizeGB: 1
+
