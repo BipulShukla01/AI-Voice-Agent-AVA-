@@ -373,6 +373,20 @@
             align-items: center;
             justify-content: space-between;
         }
+        /* Header nav */
+        html { scroll-behavior: smooth; }
+        .header-nav { display: none; gap: 16px; align-items: center; }
+        .header-nav .nav-link {
+            color: var(--text-tertiary);
+            text-decoration: none;
+            padding: 6px 10px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+        }
+        .header-nav .nav-link:hover { color: var(--text-primary); background: var(--surface); border-color: var(--border); }
+        @media (min-width: 900px) { .header-nav { display: flex; } }
+        /* Make anchored sections not hide behind sticky header */
+        .container[id] { scroll-margin-top: 90px; }
 
         /* Section heading styles */
         .section-heading {
@@ -397,6 +411,58 @@
         .section-heading .card-title {
             margin: 0;
         }
+
+        /* Marketing cards grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: var(--spacing-xl);
+            margin-top: var(--spacing-lg);
+        }
+        .feature-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            padding: clamp(16px, 3vw, 24px);
+            border: 1px solid var(--border);
+            background: radial-gradient(1000px 400px at 100% 0%, rgba(255,255,255,0.06), transparent 60%), var(--card-gradient, var(--surface));
+            box-shadow: 0 0 0 1px rgba(255,255,255,0.02) inset, var(--shadow-sm);
+            transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease, background .25s ease;
+            backdrop-filter: saturate(120%);
+        }
+        .feature-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(600px 220px at -10% -10%, rgba(255,255,255,0.06), transparent 60%), linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0));
+        }
+        .feature-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px -10px var(--card-shadow-color, rgba(0,0,0,.35));
+            border-color: var(--border-hover);
+        }
+        .feature-card .icon {
+            display:inline-flex; align-items:center; justify-content:center;
+            width: 32px; height: 32px; border-radius: 10px; margin-bottom: 10px;
+            background: var(--card-gradient, var(--primary-gradient));
+            color: white; box-shadow: 0 0 0 1px rgba(255,255,255,0.12) inset;
+        }
+        .feature-card h4 {
+            font-size: 1.05rem; font-weight: 650; margin: 0 0 6px;
+            color: var(--text-primary);
+        }
+        .feature-card p { color: var(--text-secondary); margin: 0; line-height: 1.6; }
+
+        /* Gradient accents (cycled per position) */
+        .feature-grid .feature-card:nth-child(5n+1) { --card-gradient: linear-gradient(135deg, rgba(79,172,254,.18) 0%, rgba(0,242,254,.12) 100%); --card-shadow-color: rgba(79,172,254,.35); }
+        .feature-grid .feature-card:nth-child(5n+2) { --card-gradient: linear-gradient(135deg, rgba(240,147,251,.18) 0%, rgba(245,87,108,.12) 100%); --card-shadow-color: rgba(245,87,108,.35); }
+        .feature-grid .feature-card:nth-child(5n+3) { --card-gradient: linear-gradient(135deg, rgba(67,233,123,.18) 0%, rgba(56,249,215,.12) 100%); --card-shadow-color: rgba(56,249,215,.35); }
+        .feature-grid .feature-card:nth-child(5n+4) { --card-gradient: linear-gradient(135deg, rgba(250,112,154,.18) 0%, rgba(254,225,64,.12) 100%); --card-shadow-color: rgba(250,112,154,.35); }
+        .feature-grid .feature-card:nth-child(5n)   { --card-gradient: linear-gradient(135deg, rgba(102,126,234,.18) 0%, rgba(118,75,162,.12) 100%); --card-shadow-color: rgba(102,126,234,.35); }
+
+        /* Numbered step cards (optional style for How it works vibe) */
+        .step-badge { font-family: 'JetBrains Mono', monospace; font-size: .75rem; opacity:.8; }
 
         .logo {
             display: flex;
@@ -1656,6 +1722,16 @@
             <input id="sessionSearch" type="text" placeholder="Search sessions" />
           </div>
         </div>
+        <div class="sidebar-section">
+          <div class="sidebar-section-title nav-only-title"><i class="fas fa-compass"></i> Navigation</div>
+          <ul class="session-list" id="sidebarNavList">
+            <li><a class="session-item sidebar-nav-link" href="#why-ava"><i class="fas fa-bolt"></i><span class="session-title">Why</span></a></li>
+            <li><a class="session-item sidebar-nav-link" href="#features"><i class="fas fa-star"></i><span class="session-title">Features</span></a></li>
+            <li><a class="session-item sidebar-nav-link" href="#use-cases"><i class="fas fa-compass"></i><span class="session-title">Use Cases</span></a></li>
+            <li><a class="session-item sidebar-nav-link" href="#faq"><i class="fas fa-circle-question"></i><span class="session-title">FAQ</span></a></li>
+            <li><a class="session-item sidebar-nav-link" href="#cta"><i class="fas fa-rocket"></i><span class="session-title">Get Started</span></a></li>
+          </ul>
+        </div>
         <div class="sidebar-section" id="pinnedSection" style="display:none;">
           <div class="sidebar-section-title"><i class="fas fa-thumbtack"></i> Pinned</div>
           <ul id="pinnedList" class="session-list"></ul>
@@ -1731,6 +1807,12 @@
       }
       /* Overlay: don’t push main layout */
       @media (min-width: 768px) { .container { padding-left: calc(var(--spacing-lg) + 0px); } }
+      /* Sidebar Navigation heading visibility */
+      .nav-only-title { display: block; }
+      @media (min-width: 1025px) {
+        /* Hide navigation heading on desktop */
+        .nav-only-title { display: none; }
+      }
     </style>
     
     <!-- Floating Geometric Shapes -->
@@ -1769,6 +1851,13 @@
                 </button>
                 <div class="logo">AVA</div>
             </div>
+            <nav class="header-nav" aria-label="Primary">
+                <a class="nav-link" href="#why-ava">Why</a>
+                <a class="nav-link" href="#features">Features</a>
+                <a class="nav-link" href="#use-cases">Use Cases</a>
+                <a class="nav-link" href="#faq">FAQ</a>
+                <a class="nav-link" href="#cta">Get Started</a>
+            </nav>
             <div style="display:flex; gap:10px; align-items:center;">
                 <button id="settingsBtn" class="icon-btn" title="Settings">
                     <i class="fas fa-cog"></i>
@@ -1983,6 +2072,167 @@
 
     </div>
 
+    <!-- Marketing Sections: Stacked, non-intrusive, matching existing UI -->
+    <div class="container" id="why-ava" aria-label="Why AVA">
+      <div class="section-heading">
+        <span class="section-chip"><i class="fas fa-bolt"></i> Why AVA</span>
+        <h2 class="card-title">Built for real-time voice-first interactions</h2>
+        <p style="color: var(--text-secondary); max-width: 800px; text-align: center;">
+          AVA blends high-quality speech, fast transcription, and intelligent reasoning into a seamless assistant
+          that feels natural, helpful, and ready for everyday tasks.
+        </p>
+      </div>
+
+      <div class="feature-grid" role="region" aria-label="Why AVA details">
+        <div class="feature-card">
+          <div class="icon"><i class="fas fa-wave-square"></i></div>
+          <h4>Crisp, natural speech</h4>
+          <p>Premium neural voices tuned for clarity and warmth.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon"><i class="fas fa-rocket"></i></div>
+          <h4>Low-latency responses</h4>
+          <p>Snappy feedback for fluid, live conversations.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon"><i class="fas fa-shield-alt"></i></div>
+          <h4>Privacy-first</h4>
+          <p>Local controls and clear key handling for peace of mind.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon"><i class="fas fa-plug"></i></div>
+          <h4>Flexible integrations</h4>
+          <p>Connect speech, LLMs, music, and weather effortlessly.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="container" id="features" aria-label="Features">
+      <div class="section-heading">
+        <span class="section-chip"><i class="fas fa-stars"></i> Features</span>
+        <h2 class="card-title">Everything you need to talk, think, and act</h2>
+      </div>
+
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="icon"><i class="fas fa-microphone"></i></div>
+          <h4>Real-time voice capture</h4>
+          <p>Push-to-talk and text input with smooth levels and status indicators.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon"><i class="fas fa-closed-captioning"></i></div>
+          <h4>Accurate transcription</h4>
+          <p>High-quality STT for reliable understanding of your intent.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon"><i class="fas fa-brain"></i></div>
+          <h4>Smart reasoning</h4>
+          <p>LLM-powered responses tailored to context and tasks.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon"><i class="fas fa-music"></i></div>
+          <h4>Music control</h4>
+          <p>Spotify integration for hands-free playback and discovery.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon"><i class="fas fa-cloud-sun"></i></div>
+          <h4>Weather-ready</h4>
+          <p>Current conditions and forecasts on request.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="container" id="use-cases" aria-label="Use Cases">
+      <div class="section-heading">
+        <span class="section-chip"><i class="fas fa-compass"></i> Use cases</span>
+        <h2 class="card-title">Where AVA shines</h2>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="icon"><i class="fas fa-headset"></i></div>
+          <h4>Hands-free productivity</h4>
+          <p>Quick dictation, reminders, and note taking while you focus.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon"><i class="fas fa-graduation-cap"></i></div>
+          <h4>Study companion</h4>
+          <p>Explain concepts, quiz yourself, and summarize material.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon"><i class="fas fa-dumbbell"></i></div>
+          <h4>Fitness cues</h4>
+          <p>Timers, form reminders, and motivation during workouts.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon"><i class="fas fa-music"></i></div>
+          <h4>Ambient music</h4>
+          <p>Discover and control music without lifting a finger.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="container" aria-label="Testimonials">
+      <div class="section-heading">
+        <span class="section-chip"><i class="fas fa-heart"></i> Testimonials</span>
+        <h2 class="card-title">What users say</h2>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <div class="card" style="display:flex; gap:12px; align-items:flex-start;">
+          <div class="message-avatar" style="background:linear-gradient(135deg,#4facfe,#00f2fe);">A</div>
+          <div>
+            <div style="color:var(--text-secondary);">“It feels like talking to a person. The latency is so low I forget it’s software.”</div>
+            <div style="font-size:0.8rem; opacity:0.8; margin-top:6px;">Alex • Product Designer</div>
+          </div>
+        </div>
+        <div class="card" style="display:flex; gap:12px; align-items:flex-start;">
+          <div class="message-avatar" style="background:linear-gradient(135deg,#fa709a,#fee140);">R</div>
+          <div>
+            <div style="color:var(--text-secondary);">“Setup took minutes and the voice quality is top notch.”</div>
+            <div style="font-size:0.8rem; opacity:0.8; margin-top:6px;">Riya • Engineer</div>
+          </div>
+        </div>
+        <div class="card" style="display:flex; gap:12px; align-items:flex-start;">
+          <div class="message-avatar" style="background:linear-gradient(135deg,#43e97b,#38f9d7);">M</div>
+          <div>
+            <div style="color:var(--text-secondary);">“My daily tasks and quick checks are so much faster now.”</div>
+            <div style="font-size:0.8rem; opacity:0.8; margin-top:6px;">Milan • Researcher</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container" id="faq" aria-label="FAQ">
+      <div class="section-heading">
+        <span class="section-chip"><i class="fas fa-circle-question"></i> FAQ</span>
+        <h2 class="card-title">Common questions</h2>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <div class="icon"><i class="fas fa-key"></i></div>
+          <h4>Do I need API keys?</h4>
+          <p>You can run basics without keys, while adding keys unlocks best quality speech, transcription, and integrations.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon"><i class="fas fa-database"></i></div>
+          <h4>Is my data stored?</h4>
+          <p>Session data persists only as configured. You control what’s saved; sensitive keys are handled carefully.</p>
+        </div>
+        <div class="feature-card">
+          <div class="icon"><i class="fas fa-mobile-alt"></i></div>
+          <h4>Does it work on mobile?</h4>
+          <p>Yes. The UI is responsive and supports PWA install for quick access.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="container" id="cta" aria-label="Call to action" style="text-align:center;">
+      <div class="card" style="display:inline-block; text-align:center;">
+        <h3 class="card-title" style="margin-bottom:8px;">Ready to try AVA?</h3>
+        <p style="color:var(--text-secondary); margin-bottom:16px;">Start a conversation and experience natural, real-time voice AI.</p>
+        <a href="#" class="btn btn-primary"><i class="fas fa-comments"></i> Start using AVA</a>
+      </div>
+    </div>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-content">
@@ -2109,6 +2359,12 @@
         });
       }
     </script>
+    <a href="https://murf.ai/api/docs/introduction/overview" target="_blank" rel="noopener" aria-label="Powered by Murf AI" style="position:fixed; right:12px; bottom:12px; z-index:2000; display:inline-flex; align-items:center; gap:8px; padding:6px 10px; font-size:12px; color: var(--text-secondary); background: var(--surface); border:1px solid var(--border); border-radius:9999px; text-decoration:none; backdrop-filter:saturate(120%) blur(6px); box-shadow: var(--shadow-sm);">
+      <img src="https://cdn.brandfetch.io/id9CC5Jb8T/w/400/h/400/theme/dark/icon.jpeg?c=1dxbfHSJFAPEGdCLU4o5B" alt="" style="height:16px; width:16px; border-radius:3px;"/>
+      <span>Powered by Murf AI</span>
+    </a>
+
+
     <!-- Settings Modal -->
     <div id="settingsModal" class="modal-backdrop" aria-hidden="true">
       <div class="modal">
@@ -2160,4 +2416,8 @@
     </div>
 
 </body>
+</html>
+
+</body>
+
 </html>
