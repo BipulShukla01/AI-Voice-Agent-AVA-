@@ -133,6 +133,15 @@ function initializeApp() {
                 if (e.key === 'Escape') setExpanded(false);
             });
         }
+        // Sidebar nav links: smooth-jump and close on mobile
+        try {
+            document.querySelectorAll('.sidebar-nav-link').forEach(a => {
+                a.addEventListener('click', () => {
+                    // Close sidebar on small screens after navigation
+                    if (window.innerWidth <= 1024) setExpanded(false);
+                });
+            });
+        } catch {}
         // Auto-collapse on navigation/resize for small screens
         window.addEventListener('resize', () => {
             if (window.innerWidth <= 1024) setExpanded(false);
